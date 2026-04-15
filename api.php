@@ -73,4 +73,49 @@ if ($action === 'delete_asset') {
     exit;
 }
 
+// ── Get refresh command ───────────────────────────────────
+
+if ($action === 'get_refresh_cmd') {
+    $path = "refresh_cmd.txt";
+    echo json_encode(["cmd" => file_exists($path) ? trim(file_get_contents($path)) : ""]);
+    exit;
+}
+
+// ── Save refresh command ──────────────────────────────────
+
+if ($action === 'set_refresh_cmd') {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $cmd  = trim($data['cmd'] ?? '');
+    // Only store — never execute on save
+    file_put_contents("refresh_cmd.txt", $cmd);
+    echo json_encode(["ok" => true]);
+    exit;
+}
+
+// ── Run refresh command ───────────────────────────────────
+
+if ($action === 'run_refresh') {
+    $path = "refresh_cmd.txt";
+    if (!file_exists($path)) {
+        echo json_encode(["error" => "No refresh command configured"]);
+        exit;
+    }
+    $cmd = trim(file_get_contents($path));
+    if ($cmd === '') {
+        echo json_encode(["error" => "Refresh command is empty"]);
+        exit;
+    }
+    // Run in background so the HTTP response can be sent first
+    $escaped = escapeshellcmd($cmd);
+    $output  = [];
+    $code    = 0;
+    exec($escaped . " 2>&1", $output, $code);
+    echo json_encode([
+        "ok"     => $code === 0,
+        "code"   => $code,
+        "output" => implode("\n", $output),
+    ]);
+    exit;
+}
+
 echo json_encode(["error" => "Unknown action"]);

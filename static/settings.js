@@ -1,6 +1,86 @@
 /* settings.js */
 
-// ── Auto-save preference ─────────────────────────────────
+// ── Refresh Command ──────────────────────────────────────
+
+async function loadRefreshCmd() {
+  try {
+    const r    = await fetch('api.php?action=get_refresh_cmd');
+    const data = await r.json();
+    document.getElementById('refreshCmdInput').value = data.cmd || '';
+  } catch (e) {
+    console.warn('Could not load refresh command:', e);
+  }
+}
+
+async function saveRefreshCmd() {
+  const cmd = document.getElementById('refreshCmdInput').value.trim();
+  const btn = document.getElementById('saveCmdBtn');
+  const status = document.getElementById('refreshStatus');
+
+  btn.disabled = true;
+  btn.textContent = '…';
+  status.textContent = '';
+  status.className = 'refresh-status';
+
+  try {
+    const r    = await fetch('api.php?action=set_refresh_cmd', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cmd }),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      status.textContent = '✓ Gespeichert';
+      status.classList.add('status-ok');
+    } else {
+      status.textContent = '✗ Fehler beim Speichern';
+      status.classList.add('status-err');
+    }
+  } catch (e) {
+    status.textContent = '✗ Netzwerkfehler';
+    status.classList.add('status-err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'SPEICHERN';
+    setTimeout(() => { status.textContent = ''; status.className = 'refresh-status'; }, 3000);
+  }
+}
+
+async function runRefreshCmd() {
+  const btn    = document.getElementById('runCmdBtn');
+  const status = document.getElementById('refreshStatus');
+
+  if (!confirm('Refresh-Befehl jetzt ausführen?')) return;
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Läuft…';
+  status.textContent = '';
+  status.className = 'refresh-status';
+
+  try {
+    const r    = await fetch('api.php?action=run_refresh', { method: 'POST' });
+    const data = await r.json();
+    if (data.ok) {
+      status.textContent = '✓ Erfolgreich (Code ' + data.code + ')';
+      status.classList.add('status-ok');
+    } else {
+      const msg = data.error || ('Exit-Code ' + data.code + (data.output ? ': ' + data.output : ''));
+      status.textContent = '✗ ' + msg;
+      status.classList.add('status-err');
+    }
+  } catch (e) {
+    // Response may never arrive if the service restarts immediately — that's OK
+    status.textContent = '✓ Befehl gesendet (Verbindung unterbrochen – normal bei Neustart)';
+    status.classList.add('status-ok');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '▶ JETZT AUSFÜHREN';
+  }
+}
+
+loadRefreshCmd();
+
+
 
 const toggle = document.getElementById('autoSaveToggle');
 toggle.checked = localStorage.getItem('signage_autosave') !== 'false';
