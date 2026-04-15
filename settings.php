@@ -24,6 +24,30 @@
 
   <div class="settings-col">
     <div class="settings-card">
+      <div class="settings-card-title">GERÄT / REFRESH</div>
+
+      <div class="pref-row pref-row--col">
+        <div class="pref-info">
+          <div class="pref-label">Refresh-Befehl</div>
+          <div class="pref-desc">Shell-Befehl, der auf dem Server ausgeführt wird – z.&thinsp;B. <code>sudo systemctl restart signage-kiosk</code>. Der Befehl läuft als <code>www-data</code>; stelle sicher, dass ein passender <code>sudoers</code>-Eintrag vorhanden ist (wird vom Installer automatisch gesetzt).</div>
+        </div>
+        <div class="refresh-cmd-row">
+          <input type="text" id="refreshCmdInput" class="refresh-cmd-input"
+                 placeholder="sudo systemctl restart signage-kiosk"
+                 spellcheck="false" autocomplete="off">
+          <button class="refresh-cmd-btn save-btn" id="saveCmdBtn" onclick="saveRefreshCmd()">SPEICHERN</button>
+        </div>
+        <div class="refresh-run-row">
+          <button class="refresh-cmd-btn run-btn" id="runCmdBtn" onclick="runRefreshCmd()">&#9654; JETZT AUSFÜHREN</button>
+          <span id="refreshStatus" class="refresh-status"></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="settings-col">
+    <div class="settings-card">
       <div class="settings-card-title">EDITOR PREFERENCES</div>
 
       <div class="pref-row">
