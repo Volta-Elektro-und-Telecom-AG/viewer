@@ -691,7 +691,7 @@ a { text-decoration: none; }
   gap: 16px;
   padding: 20px;
   min-height: 0;
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
 .settings-col { display: flex; flex-direction: column; gap: 16px; min-width: 240px; }
