@@ -158,4 +158,94 @@ if ($action === 'do_update') {
     exit;
 }
 
+// ── Get schedule ──────────────────────────────────────────
+if ($action === 'get_schedule') {
+    $path = "schedule.json";
+    echo file_exists($path)
+        ? file_get_contents($path)
+        : json_encode(["rules" => []]);
+    exit;
+}
+
+// ── Save schedule ─────────────────────────────────────────
+if ($action === 'save_schedule') {
+    $data = file_get_contents("php://input");
+    $decoded = json_decode($data, true);
+    if ($decoded === null) { echo json_encode(["error" => "Invalid JSON"]); exit; }
+    if (!isset($decoded['rules']) || !is_array($decoded['rules'])) {
+        echo json_encode(["error" => "Missing rules array"]); exit;
+    }
+    file_put_contents("schedule.json", $data);
+    echo json_encode(["ok" => true]);
+    exit;
+}
+
+// ── Run a single rule by id ───────────────────────────────
+if ($action === 'run_rule') {
+    $data   = json_decode(file_get_contents("php://input"), true);
+    $ruleId = trim($data['id'] ?? '');
+    $schedPath = "schedule.json";
+    if (!file_exists($schedPath)) { echo json_encode(["error" => "No schedule file"]); exit; }
+    $schedule = json_decode(file_get_contents($schedPath), true);
+    $rule = null;
+    foreach ($schedule['rules'] ?? [] as $r) {
+        if ($r['id'] === $ruleId) { $rule = $r; break; }
+    }
+    if (!$rule) { echo json_encode(["error" => "Rule not found"]); exit; }
+    $cmd = trim($rule['command'] ?? '');
+    if ($cmd === '') { echo json_encode(["error" => "Rule has no command"]); exit; }
+    $output = []; $code = 0;
+    exec($cmd . " 2>&1", $output, $code);
+    // append to log
+    $logPath = "schedule_log.json";
+    $log = file_exists($logPath) ? (json_decode(file_get_contents($logPath), true) ?? []) : [];
+    array_unshift($log, [
+        "ts"    => date("Y-m-d H:i:s"),
+        "id"    => $ruleId,
+        "label" => $rule['label'] ?? '',
+        "cmd"   => $cmd,
+        "code"  => $code,
+        "out"   => implode("\n", $output),
+        "manual"=> true,
+    ]);
+    $log = array_slice($log, 0, 100);
+    file_put_contents($logPath, json_encode($log));
+    echo json_encode(["ok" => $code === 0, "code" => $code, "output" => implode("\n", $output)]);
+    exit;
+}
+
+// ── Get schedule log ──────────────────────────────────────
+if ($action === 'get_schedule_log') {
+    $path = "schedule_log.json";
+    echo file_exists($path) ? file_get_contents($path) : json_encode([]);
+    exit;
+}
+
+// ── Check / install cron job ──────────────────────────────
+if ($action === 'check_cron') {
+    $script  = __DIR__ . '/scheduler.php';
+    $crontab = shell_exec("crontab -l -u www-data 2>/dev/null") ?? '';
+    $installed = strpos($crontab, $script) !== false;
+    echo json_encode(["installed" => $installed, "script" => $script]);
+    exit;
+}
+
+if ($action === 'install_cron') {
+    $script   = __DIR__ . '/scheduler.php';
+    $entry    = "* * * * * php {$script} >> /var/log/signage_scheduler.log 2>&1";
+    $crontab  = shell_exec("crontab -l -u www-data 2>/dev/null") ?? '';
+    if (strpos($crontab, $script) !== false) {
+        echo json_encode(["ok" => true, "msg" => "Already installed"]);
+        exit;
+    }
+    $crontab = rtrim($crontab) . "\n" . $entry . "\n";
+    $tmpFile  = tempnam(sys_get_temp_dir(), 'cron');
+    file_put_contents($tmpFile, $crontab);
+    $output = []; $code = 0;
+    exec("crontab -u www-data " . escapeshellarg($tmpFile) . " 2>&1", $output, $code);
+    unlink($tmpFile);
+    echo json_encode(["ok" => $code === 0, "code" => $code, "output" => implode("\n", $output)]);
+    exit;
+}
+
 echo json_encode(["error" => "Unknown action"]);

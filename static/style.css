@@ -951,3 +951,110 @@ a { text-decoration: none; }
     display: inline-block; 
     width: 120px; 
   }
+
+/* ═══════════════════════════════════════════════
+   SCHEDULING RULES
+═══════════════════════════════════════════════ */
+
+.rule-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.rule-row:last-child { border-bottom: none; }
+
+.rule-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.rule-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--accent);
+  min-width: 56px;
+}
+
+.rule-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.rule-days {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.day-chip {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--bg2);
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+.day-chip.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.rule-cmd {
+  display: block;
+  width: 100%;
+  font-size: 11px;
+  color: var(--text2);
+  opacity: .75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 500px;
+}
+
+.rule-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Log entries */
+.log-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.log-entry:last-child { border-bottom: none; }
+.log-entry.err .log-code { color: #e55; }
+.log-entry.ok  .log-code { color: #4b4; }
+
+.log-ts     { color: var(--text2); min-width: 130px; }
+.log-label  { color: var(--text); flex: 1; }
+.log-manual {
+  font-size: 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--text2);
+}
+.log-out {
+  cursor: help;
+  color: var(--text2);
+  text-decoration: underline dotted;
+}

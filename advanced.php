@@ -135,6 +135,87 @@ if ($isLinux) {
 ?>
 
 
+
+  <!-- ── SCHEDULES ─────────────────────────────────────── -->
+  <div class="settings-col wide">
+    <div class="settings-card">
+      <div class="settings-card-title">
+        SCHEDULES
+        <span id="cronBadge" class="update-badge checking">⬤ Checking cron…</span>
+      </div>
+
+      <!-- Cron status row -->
+      <div class="pref-row pref-row--col" id="cronRow">
+        <div class="pref-info">
+          <div class="pref-label">Cron Job</div>
+          <div class="pref-desc">
+            The scheduler runs every minute via cron as <code>www-data</code>.
+            Click <strong>Install</strong> to register it automatically, or add manually:<br>
+            <code>* * * * * php <?= __DIR__ ?>/scheduler.php</code>
+          </div>
+        </div>
+        <div class="refresh-run-row">
+          <button class="refresh-cmd-btn run-btn" id="installCronBtn" onclick="installCron()" disabled>↓ INSTALL CRON</button>
+          <span id="cronStatus" class="refresh-status"></span>
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+
+      <!-- Rule list -->
+      <div id="scheduleRules" style="margin-bottom:16px">
+        <div class="asset-loading">Loading rules…</div>
+      </div>
+
+      <!-- Add / Edit rule form -->
+      <div class="settings-card" style="background:var(--bg2);margin-top:8px" id="ruleForm">
+        <div class="settings-card-title" id="ruleFormTitle">ADD RULE</div>
+
+        <div class="pref-row" style="gap:10px;flex-wrap:wrap;align-items:flex-start">
+
+          <div style="flex:1;min-width:160px">
+            <div class="pref-label" style="margin-bottom:4px">Label</div>
+            <input type="text" id="ruleLabel" class="refresh-cmd-input" placeholder="Night Off" autocomplete="off">
+          </div>
+
+          <div style="flex:0 0 100px">
+            <div class="pref-label" style="margin-bottom:4px">Time</div>
+            <input type="time" id="ruleTime" class="refresh-cmd-input" value="22:00">
+          </div>
+
+          <div style="flex:1;min-width:220px">
+            <div class="pref-label" style="margin-bottom:4px">Command</div>
+            <input type="text" id="ruleCommand" class="refresh-cmd-input"
+              placeholder='echo "standby 0" | cec-client -s -d 1' spellcheck="false" autocomplete="off">
+          </div>
+
+        </div>
+
+        <div class="pref-row" style="margin-top:10px;align-items:flex-start;gap:16px">
+          <div>
+            <div class="pref-label" style="margin-bottom:6px">Days <span style="opacity:.5;font-size:11px">(none = every day)</span></div>
+            <div id="dayCheckboxes" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+          </div>
+        </div>
+
+        <div class="refresh-run-row" style="margin-top:14px">
+          <button class="refresh-cmd-btn save-btn"  onclick="saveRule()">SAVE RULE</button>
+          <button class="refresh-cmd-btn"            onclick="clearRuleForm()" style="opacity:.7">CLEAR</button>
+          <span id="ruleFormStatus" class="refresh-status"></span>
+        </div>
+      </div>
+
+      <!-- Log -->
+      <div style="margin-top:18px">
+        <div class="settings-card-title" style="font-size:11px;margin-bottom:8px;cursor:pointer" onclick="toggleLog()">
+          ▸ EXECUTION LOG <span id="logToggleHint" style="opacity:.5;font-weight:400">(click to show)</span>
+        </div>
+        <div id="scheduleLog" style="display:none"></div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 
